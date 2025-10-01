@@ -35,14 +35,21 @@ int main() {
     }
 
     if (is_stationary) {
-        // Fit an ARIMA model to the data
+        // Split data into train and test sets (80% train, 20% test)
+        auto split_data = train_test_split(data, 0.8);
+        auto train_data = split_data.first;
+        auto test_data = split_data.second;
+        
+        cout << "\nData split: " << train_data.size() << " training, " << test_data.size() << " testing samples" << endl;
+
+        // Fit an ARIMA model to the training data
         ARIMAModel arima_model;
         int p = pq.first;
         int q = pq.second;
-        arima_model = fit_arma_model(data, p, q);
+        arima_model = fit_arma_model(train_data, p, q);
 
         // Print the ARIMA model summary
-        cout << "ARIMA model summary:" << endl;
+        cout << "\nARIMA model summary:" << endl;
         cout << "p = " << arima_model.p << endl;
         cout << "d = " << arima_model.d << endl;
         cout << "q = " << arima_model.q << endl;
@@ -53,10 +60,23 @@ int main() {
         cout << "AIC = " << arima_model.aic << endl;
         cout << "BIC = " << arima_model.bic << endl;
 
-        // Evaluate the ARIMA model
-        double rmse;
-        rmse = evaluate(data, arima_model);
-        cout << "ARIMA model RMSE: " << rmse << endl;
+        // Evaluate the ARIMA model on training data
+        double train_rmse = evaluate(train_data, arima_model);
+        cout << "\nTraining RMSE: " << train_rmse << endl;
+
+        // Test model on test set
+        std::vector<double> test_predictions = forecast(train_data, arima_model, test_data.size());
+        double test_rmse = evaluate_predictions(test_data, test_predictions);
+        cout << "Test RMSE: " << test_rmse << endl;
+
+        // Generate future forecasts
+        int forecast_periods = 12; // Forecast next 12 periods
+        std::vector<double> future_forecasts = forecast(data, arima_model, forecast_periods);
+        
+        cout << "\nFuture forecasts (next " << forecast_periods << " periods):" << endl;
+        for (int i = 0; i < forecast_periods; i++) {
+            cout << "Period " << (i + 1) << ": " << future_forecasts[i] << endl;
+        }
     } else {
         cout << "ARIMA modeling requires stationary time series data." << endl;
     }

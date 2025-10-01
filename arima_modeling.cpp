@@ -193,3 +193,61 @@ double evaluate(const std::vector<SunspotEntry>& data, ARIMAModel model) {
 
     return rmse;
 }
+
+// Forecast next n_periods using the fitted ARIMA model
+std::vector<double> forecast(const std::vector<SunspotEntry>& data, const ARIMAModel& model, int n_periods) {
+    int n = data.size();
+    std::vector<double> forecasts(n_periods);
+    std::vector<double> series_extended;
+    
+    // Copy original data
+    for (int i = 0; i < n; i++) {
+        series_extended.push_back(data[i].SNvalue);
+    }
+    
+    // Generate forecasts
+    for (int h = 0; h < n_periods; h++) {
+        double forecast_val = 0.0;
+        
+        // AR component
+        for (int j = 0; j < model.p; j++) {
+            if (series_extended.size() > j) {
+                forecast_val += model.phi(j) * series_extended[series_extended.size() - 1 - j];
+            }
+        }
+        
+        // MA component (simplified - using zero residuals for future periods)
+        // In practice, you'd want to track residuals more carefully
+        
+        forecasts[h] = forecast_val;
+        series_extended.push_back(forecast_val);
+    }
+    
+    return forecasts;
+}
+
+// Split data into training and testing sets
+std::pair<std::vector<SunspotEntry>, std::vector<SunspotEntry>> train_test_split(const std::vector<SunspotEntry>& data, double train_ratio) {
+    int n = data.size();
+    int train_size = static_cast<int>(n * train_ratio);
+    
+    std::vector<SunspotEntry> train_data(data.begin(), data.begin() + train_size);
+    std::vector<SunspotEntry> test_data(data.begin() + train_size, data.end());
+    
+    return std::make_pair(train_data, test_data);
+}
+
+// Evaluate predictions against actual values
+double evaluate_predictions(const std::vector<SunspotEntry>& actual, const std::vector<double>& predicted) {
+    if (actual.size() != predicted.size()) {
+        throw std::invalid_argument("Actual and predicted vectors must have the same size");
+    }
+    
+    double sum_squared_error = 0.0;
+    for (size_t i = 0; i < actual.size(); i++) {
+        double error = actual[i].SNvalue - predicted[i];
+        sum_squared_error += error * error;
+    }
+    
+    return sqrt(sum_squared_error / actual.size());
+}

@@ -19,4 +19,9 @@ ARIMAModel fit_arma_model(const std::vector<SunspotEntry>& data, int p, int q);
 double evaluate(const std::vector<SunspotEntry>& data, ARIMAModel model);
 std::pair<int, int> get_pq(const std::vector<SunspotEntry>& data);
 
+// Forecasting functions
+std::vector<double> forecast(const std::vector<SunspotEntry>& data, const ARIMAModel& model, int n_periods);
+std::pair<std::vector<SunspotEntry>, std::vector<SunspotEntry>> train_test_split(const std::vector<SunspotEntry>& data, double train_ratio);
+double evaluate_predictions(const std::vector<SunspotEntry>& actual, const std::vector<double>& predicted);
+
 #endif  // ARIMA_MODELING_H
