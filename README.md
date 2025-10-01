@@ -33,6 +33,7 @@ The program includes a function to evaluate the fitted ARIMA model using the RMS
 The program includes a function to perform the Augmented Dickey-Fuller (ADF) test on the data. The function tests the null hypothesis that the data has a unit root and is non-stationary. The function returns the test statistic and p-value of the test, as well as a boolean value indicating whether the data is stationary or non-stationary.
 
 ## Usage
+### Make
 To run the program, run the following command from the terminal:
 
 $ make
@@ -42,6 +43,40 @@ This will compile the program and create an executable file named "main". To run
 $ ./main
 
 This will run the program and output the results of the analysis.
+
+### CMake
+
+First, make sure to install the dependencies.
+
+Install Armadillo:
+``` bash
+sudo apt install libarmadillo-dev
+```
+
+Install Boost 1.74.0 as in their [official guide](https://www.boost.org/doc/user-guide/getting-started.html#_download_boost):
+
+Download Boost
+``` bash
+wget -P ${HOME} https://archives.boost.io/release/1.74.0/source/boost_1_74_0.tar.bz2
+tar xf boost_1_74_0.tar.bz2
+cd boost_1_74_0
+```
+
+Bootstrap (or build) Boost:
+``` bash
+./bootstrap.sh
+./b2
+```
+
+Now cd into this project folder and build:
+``` bash
+cmake -S . -B build
+cmake --build build --parallel
+```
+
+> [! IMPORTANT]
+> The CMakeLists.txt assumes boost libraries are built under `${HOME}/boost_1_74_0`
+> Change the location as needed
 
 ## Dependencies
 - C++11 or later
